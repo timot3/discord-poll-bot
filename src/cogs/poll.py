@@ -51,6 +51,7 @@ class Poll(commands.Cog):
         file_name = 'data/' + datetime.now(tz).strftime('%H-%M-%S') + '.csv'
         df = pd.DataFrame(self._responses)
         df.to_csv(file_name)
+        df.sort_values('time')
 
         with open(file_name, 'rb') as fp:
             await ctx.channel.send(file=discord.File(fp, 'poll_results.csv'))

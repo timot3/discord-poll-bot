@@ -5,9 +5,9 @@ import os
 from src.cogs.poll import Poll
 
 TOKEN = os.environ['POLL_TOKEN'].strip()
-# print(TOKEN.strip())
+print(TOKEN.strip())
 
-bot = commands.Bot(command_prefix='poll', case_insensitive=True, help_command=None)
+bot = commands.Bot(command_prefix='poll ', case_insensitive=True, help_command=None)
 
 
 @bot.event
@@ -17,17 +17,23 @@ async def on_ready():
     print("Name: {}".format(bot.user.name))
     print("ID: {}".format(bot.user.id))
 
+
 @bot.event
 async def on_message(message: discord.Message):
     if message.author.bot:
         return
-
+    # print('ping')
     await bot.process_commands(message)
 
 
 @bot.command(name='set')
 async def set_target_channel(ctx: discord.ext.commands.Context, args):
-    bot.add_cog(Poll(bot, args[0]))
+    if len(args) < 1:
+        await ctx.send('Error: Need input channel id!')
+        return
+    # print('set target channel: ' + str(args))
+    bot.add_cog(Poll(bot, int(args)))
     await ctx.send(f'Bound to <#{ctx.channel.id}>.')
+
 
 bot.run(TOKEN)

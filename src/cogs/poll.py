@@ -15,6 +15,7 @@ class Poll(commands.Cog):
         self._target_channel = self.bot.get_channel(target)  # Channel object
         self._target_message = None
         self._responses = []
+        self._users_responded = set()
 
         print(f'Target channel: {self._target_channel}')
 
@@ -37,7 +38,12 @@ class Poll(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         curr_time, netid, reaction = self.parse_raw_react_payload(payload)
-        self._responses.append({'time': curr_time, 'netid': netid, 'reaction': reaction})
+        if netid not in self._users_responded:
+            self._users_responded.add(netid)
+            self._responses.append({'time': curr_time, 'netid': netid, 'reaction': reaction.name})
+        else:
+            entry = next(i for i in self._responses if i['netid'] == netid)
+            entry['reaction'] = reaction
         await self.remove_reaction(payload)
 
     @commands.command(name='results')

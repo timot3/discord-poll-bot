@@ -1,11 +1,12 @@
-from discord.ext import commands, tasks
 import discord
+from discord.ext import commands, tasks
+from discord.ext.commands import has_permissions
 import os
 
 from src.cogs.poll import Poll
 
 TOKEN = os.environ['POLL_TOKEN'].strip()
-print(TOKEN.strip())
+# print(TOKEN.strip())
 
 bot = commands.Bot(command_prefix='poll ', case_insensitive=True, help_command=None)
 
@@ -27,13 +28,14 @@ async def on_message(message: discord.Message):
 
 
 @bot.command(name='set')
+@has_permissions(administrator=True)
 async def set_target_channel(ctx: discord.ext.commands.Context, args):
     if len(args) < 1:
         await ctx.send('Error: Need input channel id!')
         return
     # print('set target channel: ' + str(args))
     bot.add_cog(Poll(bot, int(args)))
-    await ctx.send(f'Bound to <#{ctx.channel.id}>.')
+    await ctx.send(f'Bound to <#{str(args)}>.')
 
 
 bot.run(TOKEN)

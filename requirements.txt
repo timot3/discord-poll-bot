@@ -12,3 +12,4 @@ pytz==2020.5
 six==1.15.0
 typing-extensions==3.7.4.3
 yarl==1.6.3
+emoji~=1.1.0

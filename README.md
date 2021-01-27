@@ -14,3 +14,6 @@ the set number of responses.
 * When a new poll is created, the bot doesn't save the old answers! Be sure to run `poll results` to save poll answers.
 
 `poll results`: Saves the poll results to a `.csv` file and sends them to the same channel the command was invoked.
+
+`poll close`: Deletes the poll message.
+* This does not save results! 

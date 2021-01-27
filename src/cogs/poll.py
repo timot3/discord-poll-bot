@@ -48,7 +48,7 @@ class Poll(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         # Don't care about bot reactions
-        if payload.member.bot:
+        if payload.member.bot or payload.message_id != self._target_message.id:
             return
         curr_time, netid, uuid, reaction = self.parse_raw_react_payload(payload)
         if netid not in self._users_responded:
@@ -74,20 +74,28 @@ class Poll(commands.Cog):
 
             await ctx.channel.send(file=discord.File(fp, f'{file_name}.csv'))
 
+    @commands.command(name='close')
+    @has_permissions(administrator=True)
+    async def poll_close(self, ctx):
+        await self._target_message.delete()
+        self._target_message = None
+
     async def remove_reaction(self, payload: discord.RawReactionActionEvent):
         await self._target_message.remove_reaction(emoji=payload.emoji, member=payload.member)
 
     def parse_raw_react_payload(self, payload: discord.RawReactionActionEvent):
         curr_time = self.get_time()
-        netid = self.parse_netid(payload.member.nick)
+        netid = self.parse_netid(payload.member)
+        print(netid)
         uuid = payload.user_id
         # print(payload.emoji.name)
         react = em.demojize(payload.emoji.name)[-2]  # Get the last character of emoji (1,2,3 etc)
         print(react)
         return curr_time, netid, uuid, react
 
-    def parse_netid(self, user_nickname):
-        return user_nickname[user_nickname.find('(') + 1:user_nickname.find(')')]
+    def parse_netid(self, user: discord.Member):
+        user_name = user.display_name
+        return user_name[user_name.find('(') + 1:user_name.find(')')]
 
     def get_time(self):
         return datetime.now(tz).strftime('%H:%M:%S CST')

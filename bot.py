@@ -1,9 +1,9 @@
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 from discord.ext.commands import has_permissions
 import os
 
-from src.cogs.poll import Poll
+from cogs.poll import Poll
 
 TOKEN = os.environ['POLL_TOKEN'].strip()
 # print(TOKEN.strip())

@@ -17,3 +17,6 @@ the set number of responses.
 
 `poll close`: Deletes the poll message.
 * This does not save results! 
+
+##### TODO
+* Host bot in a docker container on the website server 

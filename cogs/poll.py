@@ -4,8 +4,9 @@ from discord.ext.commands import has_permissions
 import pandas as pd
 from datetime import datetime
 import pytz
-import unicodedata
 import emoji as em
+from slugify import slugify
+
 
 emoji = [':one:', ':two:', ':three:', ':four:', ':five:', ':six:', ':seven:', ':eight:', ':nine:']
 tz = pytz.timezone('America/Chicago')
@@ -62,10 +63,14 @@ class Poll(commands.Cog):
     @commands.command(name='results')
     @has_permissions(administrator=True)
     async def send_results(self, ctx):
-        file_name = f'data/{self._question_text}.csv'
+        file_name = f'data/{slugify(self._question_text)}.csv'
         df = pd.DataFrame(self._responses)
         df.to_csv(file_name)
         df.sort_values('time')
+
+        # Calculate percentages of responses
+        response_percents = df['reaction'].value_counts(normalize=True) * 100
+        await ctx.channel.send ('Results:\n' + str(response_percents))
 
         with open(file_name, 'rb') as fp:
             file_name = self._question_text
@@ -89,7 +94,7 @@ class Poll(commands.Cog):
         print(netid)
         uuid = payload.user_id
         # print(payload.emoji.name)
-        react = em.demojize(payload.emoji.name)[-2]  # Get the last character of emoji (1,2,3 etc)
+        react = em.demojize(payload.emoji.name)[-2]  # Get the last character of emoji, ignore ":" char (1,2,3 etc)
         print(react)
         return curr_time, netid, uuid, react
 

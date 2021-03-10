@@ -8,7 +8,7 @@ from cogs.poll import Poll
 TOKEN = os.environ['POLL_TOKEN'].strip()
 # print(TOKEN.strip())
 
-bot = commands.Bot(command_prefix='poll ', case_insensitive=True, help_command=None)
+bot = commands.Bot(command_prefix=('poll ', 'Poll ', 'P ', 'p '), case_insensitive=True, help_command=None)
 
 
 @bot.event

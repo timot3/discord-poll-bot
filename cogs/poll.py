@@ -6,6 +6,7 @@ from datetime import datetime
 import pytz
 import emoji as em
 from slugify import slugify
+from collections import deque
 
 
 emoji = [':one:', ':two:', ':three:', ':four:', ':five:', ':six:', ':seven:', ':eight:', ':nine:']
@@ -21,6 +22,7 @@ class Poll(commands.Cog):
         self._responses = []
         self._users_responded = set()
         self._question_text = ''
+        self._queue = deque([])
 
         print(f'Target channel: {self._target_channel}')
 
@@ -70,14 +72,13 @@ class Poll(commands.Cog):
 
         # Calculate percentages of responses
         response_percents = df['reaction'].value_counts(normalize=True) * 100
-        await ctx.channel.send ('Results:\n' + str(response_percents))
 
         with open(file_name, 'rb') as fp:
             file_name = self._question_text
             if len(file_name) == 0:  # If the question has no text
                 file_name = 'question'
 
-            await ctx.channel.send(file=discord.File(fp, f'{file_name}.csv'))
+            await ctx.channel.send('Results:\n' + str(response_percents), file=discord.File(fp, f'{file_name}.csv'))
 
     @commands.command(name='close')
     @has_permissions(administrator=True)

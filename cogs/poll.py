@@ -23,6 +23,7 @@ class Poll(commands.Cog):
         self._users_responded = set()
         self._question_text = ''
         self._queue = deque([])
+        self._attendance = set()
 
         print(f'Target channel: {self._target_channel}')
 
@@ -57,6 +58,8 @@ class Poll(commands.Cog):
         if netid not in self._users_responded:
             self._users_responded.add(netid)
             self._responses.append({'time': curr_time, 'netid': netid, 'uuid': uuid, 'reaction': reaction})
+            if netid not in self._attendance:
+                self._attendance.add(netid)
         else:
             entry = next(i for i in self._responses if i['uuid'] == uuid)
             entry['reaction'] = reaction
@@ -72,19 +75,31 @@ class Poll(commands.Cog):
 
         # Calculate percentages of responses
         response_percents = df['reaction'].value_counts(normalize=True) * 100
+        total_responses = len(df)
 
         with open(file_name, 'rb') as fp:
             file_name = self._question_text
             if len(file_name) == 0:  # If the question has no text
                 file_name = 'question'
 
-            await ctx.channel.send('Results:\n' + str(response_percents), file=discord.File(fp, f'{file_name}.csv'))
+            await ctx.channel.send('Results:\nTotal Responses: ' +str(total_responses)+'\n'+ str(response_percents), file=discord.File(fp, f'{file_name}.csv'))
 
     @commands.command(name='close')
     @has_permissions(administrator=True)
     async def poll_close(self, ctx):
         await self._target_message.delete()
         self._target_message = None
+
+    @commands.command(name='lecture')
+    @has_permissions(administrator=True)
+    async def start_lecture(self, ctx, *arg):
+        if arg[0].lower() == 'start':
+            self._attendance = set()
+            await ctx.send(f'Lecture started. Bound to: <#{self._target_channel_id}>')
+
+        elif arg[0].lower() == 'end':
+            attendance = '\n'.join(self._attendance)
+            await ctx.send(f'Lecture ended. Attendance:\n{attendance}')
 
     async def remove_reaction(self, payload: discord.RawReactionActionEvent):
         await self._target_message.remove_reaction(emoji=payload.emoji, member=payload.member)
